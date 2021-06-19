@@ -1,1 +1,1 @@
-web: gunicorn DoE:server
+web: gunicorn doe:server
