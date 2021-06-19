@@ -345,7 +345,7 @@ def update_equation(input_num, input_factor, input_resp, txt_clicks):
         if i == 0:
             lst_equation.append('%s'%lst_B[i])
         else:
-            lst_equation.append('%s * %s'%(lst_B[i], input_factor[i]))
+            lst_equation.append('%s * %s'%(round(lst_B[i], 4), input_factor[i]))
     equation = 'Y = ' + ' + '.join(lst_equation)
     
     SS_tot = ((resp - resp.mean())**2).sum()
