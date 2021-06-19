@@ -343,7 +343,7 @@ def update_equation(input_num, input_factor, input_resp, txt_clicks):
     lst_equation = []
     for i in range(len(lst_B)):
         if i == 0:
-            lst_equation.append('%s'%(round(lst_B[i], 4))
+            lst_equation.append('%s'%(round(lst_B[i], 4)))
         else:
             lst_equation.append('%s * %s'%(round(lst_B[i], 4), input_factor[i]))
     equation = 'Y = ' + ' + '.join(lst_equation)
