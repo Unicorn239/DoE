@@ -375,6 +375,6 @@ def update_equation(input_num, input_factor, input_resp, txt_clicks):
     
     
 if __name__ == '__main__':
-    DoE.run_server(debug = False, 
+    doe.run_server(debug = False, 
                    host="0.0.0.0",
                    port=port)
