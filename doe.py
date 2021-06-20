@@ -358,12 +358,10 @@ def update_equation(input_num, input_factor, input_resp, txt_clicks):
 # Calculation of Q2
     PRESS = 0
     for i in range(len(resp)):
-        mx_rsd_q = Y - X * B
+        mx_rsd_q = Y[0:i] - X[0:i, :] * B
         [lst_rsd_q] = mx_rsd_q.T.tolist()
         PRESS_rsd = pd.Series([i**2 for i in lst_rsd_q]).sum()
         PRESS += PRESS_rsd
-        Y = np.delete(Y, (0), axis = 0)
-        X = np.delete(X, (0), axis = 0)
 
     Q_square = round(1 - PRESS / SS_tot, 4)
     
