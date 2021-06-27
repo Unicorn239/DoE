@@ -172,8 +172,8 @@ app.layout = html.Div(
                                         html.Li(
                                              [
                                                'Homepage -',
-                                               html.A('https://github.com/Unicorn239', 
-                                                       href = 'https://github.com/Unicorn239')
+                                               html.A('https://linkedin.com/in/waynegu', 
+                                                       href = 'https://linkedin.com/in/waynegu')
                                              ]
                                                )
                                       ]
