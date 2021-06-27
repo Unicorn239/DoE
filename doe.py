@@ -16,313 +16,391 @@ port = int(os.environ.get("PORT", 5000))
 
 app.layout = html.Div(
                   [
-                    html.H2('DoE Matrix Analyzer',
-                            style = {'textAlign' : 'center'}),
+                    html.H2(
+                             'DoE Matrix Analyzer',
+                             style = {
+                                       'textAlign' : 'center'
+                                     }
+                           ),
+                    html.Br(),
                     dbc.Row(
                         [
                           dbc.Col(
                               [
-                                html.H3('Generate DoE design matrix'),
-                                html.Br(),
-                                html.Ul(
-                                     [    
-                                       html.Li('Number of variables selected determines the number of experiments \
-                                                matrix rows'),
-                                       html.Li('Experiments ought to be conducted as instructed with the matrix'),
-                                       html.Li('Impact of interactions between variables could be assessed either \
-                                                collectively or individually'),
-                                       html.Li('Decision to either keep or remove variable(s) and/or interactions \
-                                                depends on evaluation of R2/Q2') 
-                                     ]
-                                       ),
-                                 dbc.Label('Select number of factors'),
+                                 html.Ul(
+                                      [
+                                        html.Li('Two-level full factorial DoE design matrix - X'),
+                                        html.Li('Size of matrix - 2^n'),
+                                        html.Li('Effect of cross-interactions of variables evaluated'),
+                                        html.Li('Response - Y, obtained from actual experiments')
+                                      ]
+                                        ),
                                  html.Br(),
+                                 dbc.Label('Select number of variables to generate design matrix'),
                                  dcc.Dropdown(
-                                               id = 'dd_num',
-                                               options = [{'label' : '%s variables' %i, 'value' : i} \
-                                                          for i in [3, 4, 5]],
-                                               placeholder = 'Number of variables',
+                                        id = 'dd_num',
+                                        options = [
+                                                    {'label' : '%s' %num, 'value' : num} for num in [3, 4, 5]
+                                                  ],
+                                        placeholder = 'select n for matrix 2^n',
+                                        value = None,
+                                        style = {
+                                                  'width' : '60%',
+                                                  'height' : 16,
+                                                  'margin-left' : '5%',
+                                                  'background-color' : 'black',
+                                                  'color' : 'black'
+                                                }
+                                             ),
+                                 html.Br(),
+                                 html.Br(),
+                                 dbc.Label('Display design matrix - experiment plan'),
+                                 html.Br(),
+                                 html.Div(
+                                           id = 'matrix',
+                                           style = {
+                                                     'width' : '80%',
+                                                     'height' : 80,
+                                                     'color' : 'white',
+                                                     'fontSize' : 13,
+                                                     'margin-left' : '5%'
+                                                   }
+                                         ),
+                                 html.Br(),
+                                 html.Br(),
+                                 dbc.Label('Clear selection and design matrix'),
+                                 html.Br(),
+                                 html.Button(
+                                              'Reset',
+                                              id = 'bt_reset',
+                                              style = {
+                                                        'width' : '16%',
+                                                        'height' : 28,
+                                                        'margin-left' : '7.5%',
+                                                        'background-color' : 'black',
+                                                        'color' : 'white'
+                                                      }                                              
+                                            ),
+                                 html.Br(),
+                                 html.Br(),
+                                 html.Br(),
+                                 dbc.Label('Input experiment result - Y'),
+                                 html.Br(),
+                                 dcc.Textarea(
+                                               placeholder = 'Y = 2^n',
+                                               id = 'Y',
                                                style = {
-                                                         'width' : '60%',
-                                                         'height' : 25,
-                                                         'margin-left' : '5%',
+                                                         'width' : '50%',
+                                                         'height' : 40,
                                                          'background-color' : 'black',
-                                                         'color' : 'black'
-                                                       }    
-                                             ),
-                                  html.Br(),
-                                  dbc.Label('Select factors for assessments'),
-                                  html.Br(),
-                                  dcc.Dropdown(
-                                                id = 'dd_factor',
-                                                placeholder = 'Factors for matrix calculation',
-                                                multi = True,
-                                                style = {
-                                                          'width' : '60%',
-                                                          'height' : 25,
-                                                          'margin-left' : '5%',
-                                                          'background-color' : 'black',
-                                                          'color' : 'black'                                                        
-                                                        }                                   
-                                              ), 
-                                  html.Br(),
-                                  html.Br(),
-                                  html.Br(),
-                                  html.Br(),
-                                  html.Br(),
-                                  html.Br(),
-                                  dbc.Label('Display design matrix'),
-                                  html.Br(),
-                                  html.Div(
-                                            id = 'matrix',
-                                            style = {
-                                                      'width' : '80%',
-                                                      'height' : 100,
-                                                      'margin-left' : '5%'
-                                                    }
-                                          ),
-                                  html.Br(),
-                                  html.Br(),
-                                  html.Button(
-                                               'Clear',
-                                               id = 'bt_clr',
-                                               style = {                                                
-                                                         'width' : '20%',
-                                                         'height' : 25,
-                                                         'background-color' : 'black',
+                                                         'margin-left' : '7.5%',
                                                          'color' : 'white',
-                                                         'margin-left' : '8.5%'                                                 
-                                                        }
+                                                         'fontSize' : 13
+                                                       }
                                              ),
+                                 html.Br(),
+                                 html.Br(),
+                                 dbc.Label('Prediction with slider bars'),
+                                 html.Br(),
+                                 html.Div(
+                                           [
+                                             dbc.Label('Slider for Factor A'),
+                                             html.Br(),
+                                             dcc.Slider(
+                                                         id = 'slider_A',
+                                                         min = -1,
+                                                         max = 1,
+                                                         step = 0.05,
+                                                         tooltip = {'always_visible' : True}                                                                     
+                                                       ),
+                                             dbc.Label('Slider for Factor B'),
+                                             html.Br(),
+                                             dcc.Slider(
+                                                         id = 'slider_B',
+                                                         min = -1,
+                                                         max = 1,
+                                                         step = 0.05,
+                                                         tooltip = {'always_visible' : True}                                                                     
+                                                       ),
+                                             dbc.Label('Slider for Factor C'),
+                                             html.Br(),
+                                             dcc.Slider(
+                                                         id = 'slider_C',
+                                                         min = -1,
+                                                         max = 1,
+                                                         step = 0.05,
+                                                         tooltip = {'always_visible' : True}                                                                     
+                                                       ),
+                                             dbc.Label('Slider for Factor D'),
+                                             html.Br(),
+                                             dcc.Slider(
+                                                         id = 'slider_D',
+                                                         min = -1,
+                                                         max = 1,
+                                                         step = 0.05,
+                                                         tooltip = {'always_visible' : True}                                                                     
+                                                       ),
+                                             dbc.Label('Slider for Factor E'),
+                                             html.Br(),
+                                             dcc.Slider(
+                                                         id = 'slider_E',
+                                                         min = -1,
+                                                         max = 1,
+                                                         step = 0.05,
+                                                         tooltip = {'always_visible' : True}                                                                     
+                                                       )                                     
+                                           ],
+                                             style = {
+                                                       'width' : '50%',
+                                                       'height' : 50,
+                                                       'margin-left' : '5%',
+                                                       'background-color' : 'black'
+                                                     }
+                                         ),                                
                               ],
-                                md = 3,
-                                lg = 6
+                              lg = 6, 
+                              md = 3
                                  ),
-                          
+                        
                           dbc.Col(
                               [
-                                html.H3('Calculation and evaluation of regression coefficients'),
-                                html.Br(),
-                                html.Ul(
-                                     [
-                                         html.Li('Input values of response derived from conducting experiments \
-                                                  instructed by DoE design matrix'),
-                                         html.Li('Separate values either by space or comma'),
-                                         html.Li('Regression equation, R2, Q2 will be displayed'),
-                                         html.Li(
-                                                  [
-                                                    'Github homepage - ',
-                                                    html.A('https://github.com/Unicorn239', 
-                                                            href = 'https://github.com/Unicorn239')
-                                                  ]
-                                                 )
-                                     ]
-                                       ),
-                                html.Br(),
-                                html.Br(),
-                                dbc.Label('Input \'response\' - Y'),
-                                html.Br(),
-                                dcc.Textarea(
-                                              id = 'response',
-                                              placeholder = 'Response - Y',
+                                 html.Ul(
+                                      [
+                                        html.Li('Matrix calculation to yield matrix B'),
+                                        html.Li('Regression equation displayed'),
+                                        html.Li('Goodness of fit, goodness of prediction displayed'),
+                                        html.Li(
+                                             [
+                                               'Homepage -',
+                                               html.A('https://github.com/Unicorn239', 
+                                                       href = 'https://github.com/Unicorn239')
+                                             ]
+                                               )
+                                      ]
+                                        ),
+                                 html.Br(),
+                                 dbc.Label('Select variables for assessment'),
+                                 html.Br(),
+                                 html.Br(),
+                                 dcc.Dropdown(
+                                        id = 'dd_fcts',
+                                        value = None,
+                                        placeholder = 'select variables for regression',
+                                        multi = True,
+                                        style = {
+                                                  'width' : '75%',
+                                                  'height' : 20,
+                                                  'margin-left' : '3%',
+                                                  'background-color' : 'black',
+                                                  'color' : 'black'
+                                                }                                        
+                                             ),
+                                 html.Br(),
+                                 html.Br(),
+                                 html.Br(),
+                                 html.Div(
+                                           id = 'equation',
+                                           style = {
+                                                     'width' : '80%',
+                                                     'height' : 50,
+                                                     'color' : 'white',
+                                                     'fontSize' : 13,
+                                                     'margin-left' : '5%'
+                                                   }                                           
+                                         ),
+                                 html.Div(
+                                           id = 'R2',
+                                           style = {
+                                                     'width' : '80%',
+                                                     'height' : 50,
+                                                     'color' : 'white',
+                                                     'fontSize' : 13,
+                                                     'margin-left' : '5%'
+                                                   }                                           
+                                         ),
+                                 html.Div(
+                                           id = 'Q2',
+                                           style = {
+                                                     'width' : '80%',
+                                                     'height' : 50,
+                                                     'color' : 'white',
+                                                     'fontSize' : 13,
+                                                     'margin-left' : '5%'
+                                                   }                                           
+                                         ),
+                                 html.Button(
+                                              'Clear',
+                                              id = 'bt_clr',
                                               style = {
+                                                        'width' : '13%',
+                                                        'height' : 25,
                                                         'background-color' : 'black',
-                                                        'color' : 'white',
                                                         'margin-left' : '5%',
-                                                        'width' : '50%',
-                                                        'height' : 50
-                                                        }
-                                              ),
-                                html.Br(),
-                                html.Br(),
-                                dbc.Label('DoE model equation'),
-                                html.Br(),
-                                html.Div(
-                                          id = 'equation',
-                                          style = {
-                                                    'width' : '80%',
-                                                    'height' : 30,
-                                                    'margin-left' : '5%'
-                                                  }
-                                        ),
-                                html.Br(),
-                                html.Br(),
-                                html.Div(
-                                          id = 'R_square',
-                                          style = {
-                                                    'width' : '80%',
-                                                    'height' : 20,
-                                                    'margin-left' : '5%'
-                                                  }                                    
-                                        ),
-                                html.Br(),
-                                html.Br(),
-                                html.Div(
-                                          id = 'Q_square',
-                                          style = {
-                                                    'width' : '80%',
-                                                    'height' : 20,
-                                                    'margin-left' : '5%'
-                                                  }                                    
-                                        ),
-                                html.Br(),
-                                html.Br(),
-                                html.Button(
-                                             'Clear',
-                                             id = 'txt_clr',
-                                             style = {
-                                                       'width' : '20%',
-                                                       'height' : 25,
-                                                       'background-color' : 'black',
-                                                       'color' : 'white',
-                                                       'margin-left' : '8.5%'
-                                                       }                                  
-                                             )                                
+                                                        'color' : 'white'
+                                                      }     
+                                                      
+                                            ),
+                                 html.Br(),
+                                 html.Br(),
+                                 html.Br(),
+                                 html.Br(),
+                                 dbc.Label('Show predicted response below'),
+                                 html.Br(),
+                                 html.Br(),
+                                 html.Div(
+                                           id = 'response',
+                                           style = {
+                                                     'width' : '80%',
+                                                     'height' : 50,
+                                                     'color' : 'white',
+                                                     'fontSize' : 20,
+                                                     'margin-left' : '5%'                                               
+                                                   }
+                                         )
                               ],
-                                md = 3,
-                                lg = 6
+                              lg = 6, 
+                              md = 3
                                  )
-                        ]
+                        ]  
                            )
                   ]
                      )
 
-
+#  purpose of the callback below is to define and pass 'options' component to Dropdown - dd_fcts 
+#  and to create the design matrix - experiment plan
+#  bt_reset is used to reset the design matrix, but does not stop the information flow from dd_num to dd_fcts 
 @app.callback(
-               Output('dd_factor', 'options'), 
-               Input('dd_num', 'value')
+              Output('dd_fcts', 'options'), 
+              Output('matrix', 'children'),
+              Output('bt_reset', 'n_clicks'),
+              Input('dd_num', 'value'),
+              Input('bt_reset', 'n_clicks')
              )
-def update_dd_factor(input_num):  
+def update_option(input_num, n_clicks):
     if not input_num:
         raise PreventUpdate
- 
-    if input_num == 3:
-        return [{'label' : '%s' %factor, 'value' : factor} for factor in ['A', 'B', 'C', 'AB', 'AC', 'BC']]
-    
-    if input_num == 4:
-        return [{'label' : '%s' %factor, 'value' : factor} for factor in ['A', 'B', 'C', 'D', 'AB', 'AC', 'AD', \
-                                                                          'BC', 'BD', 'CD']]
-    if input_num == 5:
-        return [{'label' : '%s' %factor, 'value' : factor} for factor in ['A', 'B', 'C', 'D', 'E', 'AB', 'AC', \
-                                                                 'AD', 'AE', 'BC', 'BD', 'BE', 'CD', 'CE', 'DE']]
-                                                                
-
-
-@app.callback(
-               Output('dd_factor', 'value'),
-               Output('matrix', 'children'),
-               Output('bt_clr', 'n_clicks'),
-               Input('dd_num', 'value'),
-               Input('dd_factor', 'value'),
-               Input('bt_clr', 'n_clicks')
-             )
-def update_matrix(input_num, input_factor, clr_clicks):
-    if not input_num:
-        raise PreventUpdate
-    
-    if input_num == 3:
-        df = pd.DataFrame(
-            {
-              'A' : [-1, 1, -1, 1, -1, 1, -1, 1],
-              'B' : [-1, -1, 1, 1, -1, -1, 1, 1],
-              'C' : [-1, -1, -1, -1, 1, 1, 1, 1]
-            }
-             )
-        mx = np.matrix(df)
         
-    elif input_num == 4:
+    if input_num == 3:
+        options = [{'label' : '%s' %fct, 'value' : fct} for fct in ['A', 'B', 'C', 'AB', 'AC', 'BC']]
         df = pd.DataFrame(
-            {
-              'A' : [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
-              'B' : [-1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1],
-              'C' : [-1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1],
-              'D' : [-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1]
-            }
-             )
-        mx = np.matrix(df)
+                           {
+                             'A' : [-1, 1, -1, 1, -1, 1, -1, 1],
+                             'B' : [-1, -1, 1, 1, -1, -1, 1, 1],
+                             'C' : [-1, -1, -1, -1, 1, 1, 1, 1]
+                           }
+                         )
+        str_matrix = 'A B C : ' + str(np.array(df))
+
+    elif input_num == 4:
+        options = [{'label' : '%s' %fct, 'value' : fct} for fct in ['A', 'B', 'C', 'D', 'AB', 'AC', 'AD',\
+                                                                    'BC', 'BD', 'CD']]
+        df = pd.DataFrame(
+                           {
+                             'A' : [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+                             'B' : [-1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1],
+                             'C' : [-1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1],
+                             'D' : [-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1]
+                           }
+                         )
+        str_matrix = 'A B C D : ' + str(np.array(df))  
 
     elif input_num == 5:
+        options = [{'label' : '%s' %fct, 'value' : fct} for fct in ['A', 'B', 'C', 'D', 'E', 'AB', 'AC', 'AD',\
+                                                                    'AE','BC', 'BD', 'BE', 'CD', 'CE', 'DE']]
         df = pd.DataFrame(
-            {
-              'A' : [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
-              'B' : [-1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1],
-              'C' : [-1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1],
-              'D' : [-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1],
-              'E' : [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],                     
-            }
-             )        
-        mx = np.matrix(df)
-        
-    if not clr_clicks:
-        return input_factor, str(mx), None
-    else:
-        return '', '', None
+                           {
+                             'A' : [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, \
+                                    -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+                             'B' : [-1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, \
+                                    -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1],
+                             'C' : [-1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, \
+                                    -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1],
+                             'D' : [-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                                    -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1],
+                             'E' : [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, \
+                                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                           }
+                         ) 
+        str_matrix = 'A B C D E : ' + str(np.array(df))  
+
+    if not n_clicks:
+        return options, str_matrix, None
+    
+    elif n_clicks:
+        return options, None, None
 
 
 @app.callback(
                Output('equation', 'children'),
-               Output('R_square', 'children'),
-               Output('Q_square', 'children'),
-               Output('txt_clr', 'n_clicks'),
+               Output('R2', 'children'),
+               Output('Q2', 'children'),
+               Output('bt_clr', 'n_clicks'),
                Input('dd_num', 'value'),
-               Input('dd_factor', 'value'),    
-               Input('response', 'value'),
-               Input('txt_clr', 'n_clicks')
+               Input('dd_fcts', 'value'),
+               Input('Y', 'value'),
+               Input('bt_clr', 'n_clicks')
              )
-def update_equation(input_num, input_factor, input_resp, txt_clicks):
-    mo = re.compile(r'\d*\.?\d+')
-    resp = pd.Series(mo.findall(input_resp)).astype(float)   
-    
-    if not input_num or not input_factor or 2**input_num != len(resp):
+def update_results(input_num, input_fcts, input_Y, n_clicks):  
+    if not input_num or not input_fcts or not input_Y:
         raise PreventUpdate
     
+    mo = re.compile(r'\d*\.?\d+')
+    Y = np.array(mo.findall(input_Y)).astype(float).T    # Get Y for matrix calculation
+    
+    if 2**input_num != len(Y):
+        raise PreventUpdate
+        
     if input_num == 3:
         df = pd.DataFrame(
-            {
-              'intecept' : [1, 1, 1, 1, 1, 1, 1, 1],
-              'A' : [-1, 1, -1, 1, -1, 1, -1, 1],
-              'B' : [-1, -1, 1, 1, -1, -1, 1, 1],
-              'C' : [-1, -1, -1, -1, 1, 1, 1, 1]
-            }
-             )
+                           {
+                             'A' : [-1, 1, -1, 1, -1, 1, -1, 1],
+                             'B' : [-1, -1, 1, 1, -1, -1, 1, 1],
+                             'C' : [-1, -1, -1, -1, 1, 1, 1, 1]
+                           }
+                         )
+        df['int'] = [1, 1, 1, 1, 1, 1, 1, 1]
         df['AB'] = df.A * df.B
         df['AC'] = df.A * df.C
         df['BC'] = df.B * df.C
-        
-        input_factor.insert(0, 'intecept')
-        X = np.matrix(df[input_factor])
-        
+        input_fcts.insert(0, 'int')
+        X = np.array(df[input_fcts])
+
     elif input_num == 4:
         df = pd.DataFrame(
-            {
-              'intecept' : [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-              'A' : [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
-              'B' : [-1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1],
-              'C' : [-1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1],
-              'D' : [-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1]
-            }
-             )
+                           {
+                             'A' : [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+                             'B' : [-1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1],
+                             'C' : [-1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1],
+                             'D' : [-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1]
+                           }
+                         )
+        df['int'] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         df['AB'] = df.A * df.B
         df['AC'] = df.A * df.C
         df['AD'] = df.A * df.D
         df['BC'] = df.B * df.C
         df['BD'] = df.B * df.D
         df['CD'] = df.C * df.D
+        input_fcts.insert(0, 'int')
+        X = np.array(df[input_fcts])
         
-        input_factor.insert(0, 'intecept')
-        X = np.matrix(df[input_factor])
-
     elif input_num == 5:
         df = pd.DataFrame(
-            {
-              'intecept' : [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-              'A' : [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
-              'B' : [-1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1],
-              'C' : [-1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1],
-              'D' : [-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1],
-              'E' : [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],                     
-            }
-             )
+                           {
+                             'A' : [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, \
+                                    -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+                             'B' : [-1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, \
+                                    -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1],
+                             'C' : [-1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, \
+                                    -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1],
+                             'D' : [-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                                    -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1],
+                             'E' : [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, \
+                                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                           }
+                         )     
+        df['int'] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\
+                     1, 1, 1, 1, 1]
         df['AB'] = df.A * df.B
         df['AC'] = df.A * df.C
         df['AD'] = df.A * df.D
@@ -333,43 +411,191 @@ def update_equation(input_num, input_factor, input_resp, txt_clicks):
         df['CD'] = df.C * df.D
         df['CE'] = df.C * df.E
         df['DE'] = df.D * df.E
-        
-        input_factor.insert(0, 'intecept')
-        X = np.matrix(df[input_factor]) 
-        
-    Y = np.matrix(resp).T
-    B = (X.T * X).I * (X.T * Y)
-    [lst_B] = B.T.tolist()
-    lst_equation = []
+        input_fcts.insert(0, 'int')
+        X = np.array(df[input_fcts])
+    
+    B = np.linalg.inv((X.T @ X)) @ (X.T @ Y)
+    lst_B = B.T.tolist()
+    
+    equation = []
     for i in range(len(lst_B)):
         if i == 0:
-            lst_equation.append('%s'%round(lst_B[i], 4))
-        else:
-            lst_equation.append('%s * %s'%(round(lst_B[i], 4), input_factor[i]))
-    equation = 'Y = ' + ' + '.join(lst_equation)
+            equation.append(str(round(lst_B[i], 4)))
+        else:   
+            equation.append('%s x %s' %(round(lst_B[i], 4), input_fcts[i]))
     
-    SS_tot = ((resp - resp.mean())**2).sum()
-    mx_rsd = Y - X * B 
-    [lst_rsd] = mx_rsd.T.tolist()
-    se_rsd = pd.Series([i**2 for i in lst_rsd])
-    SS_rsd = se_rsd.sum()
-    R_square = round(1 - SS_rsd / SS_tot, 4)
+    str_equation = 'Response = ' + ' + '.join(equation)
     
-# Calculation of Q2
+    Y_mean = Y.T.mean()
+    SS_tot = ((Y.T - Y_mean)**2).sum()
+    lst_rsd = (Y - X @ B).T.tolist()
+    lst_rsd_square = [rsd**2 for rsd in lst_rsd]
+    SS_rsd = np.sum(lst_rsd_square)
+    
+    R2 = 'R2 = ' + str(round(1 - SS_rsd / SS_tot, 4))
+    
     PRESS = 0
-    for i in range(len(resp)):
-        mx_rsd_q = Y[0:i+1] - X[0:i+1, :] * B
-        [lst_rsd_q] = mx_rsd_q.T.tolist()
-        PRESS_rsd = pd.Series([i**2 for i in lst_rsd_q]).sum()
-        PRESS += PRESS_rsd
+    for i in range(len(Y)):
+        lst_rsd = (X[0:i+1, :] @ B - Y[0:i+1]).T.tolist()
+        PRS = np.sum([rsd**2 for rsd in lst_rsd])
+        PRESS += PRS
+   
+    Q2 = 'Q2 = ' + str(round(1 - PRESS / SS_tot, 4))
+    
+    if not n_clicks:
+        return str_equation, R2, Q2, None
+    
+    elif n_clicks:
+        return None, None, None, None
 
-    Q_square = round(1 - PRESS / SS_tot, 4)
     
-    if not txt_clicks:
-        return equation, 'R^2 = %s'%R_square, 'Q^2 = %s'%Q_square, None
+#  This callback predicts response based on inputs from sliders
+@app.callback(
+               Output('response', 'children'),
+               Input('dd_num', 'value'),
+               Input('dd_fcts', 'value'),
+               Input('Y', 'value'),
+               Input('slider_A', 'value'),
+               Input('slider_B', 'value'),
+               Input('slider_C', 'value'),
+               Input('slider_D', 'value'),
+               Input('slider_E', 'value')
+             )
+def update_prediction(input_num, input_fcts, input_Y, sl_A, sl_B, sl_C, sl_D, sl_E):
+    if not input_num or not input_fcts:
+        raise PreventUpdate
     
-    else: 
-        return '', '', '', None
+    mo = re.compile(r'\d*\.?\d+')
+    Y = np.array(mo.findall(input_Y)).astype(float).T    # Get Y for matrix calculation
+    
+    if 2**input_num != len(Y):
+        raise PreventUpdate
+        
+    if input_num == 3:
+        df = pd.DataFrame(
+                           {
+                             'A' : [-1, 1, -1, 1, -1, 1, -1, 1],
+                             'B' : [-1, -1, 1, 1, -1, -1, 1, 1],
+                             'C' : [-1, -1, -1, -1, 1, 1, 1, 1]
+                           }
+                         )
+        df['int'] = [1, 1, 1, 1, 1, 1, 1, 1]
+        df['AB'] = df.A * df.B
+        df['AC'] = df.A * df.C
+        df['BC'] = df.B * df.C
+        input_fcts.insert(0, 'int')
+        X = np.array(df[input_fcts])
+        
+        p_df = pd.DataFrame(
+                             {
+                               'A' : [sl_A],
+                               'B' : [sl_B],
+                               'C' : [sl_C]
+                             }
+                           )
+        p_df['int'] = [1]
+        p_df['AB'] = p_df.A * p_df.B
+        p_df['AC'] = p_df.A * p_df.C
+        p_df['BC'] = p_df.B * p_df.C
+        p_X = np.array(p_df[input_fcts])
+ 
+    elif input_num == 4:
+        df = pd.DataFrame(
+                           {
+                             'A' : [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+                             'B' : [-1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1],
+                             'C' : [-1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1],
+                             'D' : [-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1]
+                           }
+                         )
+        df['int'] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        df['AB'] = df.A * df.B
+        df['AC'] = df.A * df.C
+        df['AD'] = df.A * df.D
+        df['BC'] = df.B * df.C
+        df['BD'] = df.B * df.D
+        df['CD'] = df.C * df.D
+        input_fcts.insert(0, 'int')
+        X = np.array(df[input_fcts])
+
+        p_df = pd.DataFrame(
+                             {
+                               'A' : [sl_A],
+                               'B' : [sl_B],
+                               'C' : [sl_C],
+                               'D' : [sl_D]
+                             }
+                           )
+        p_df['int'] = [1]
+        p_df['AB'] = p_df.A * p_df.B
+        p_df['AC'] = p_df.A * p_df.C
+        p_df['AD'] = p_df.A * p_df.D
+        p_df['BC'] = p_df.B * p_df.C
+        P_df['BD'] = p_df.B * p_df.D
+        p_df['CD'] = p_df.C * p_df.D
+        p_X = np.array(p_df[input_fcts])        
+        
+    elif input_num == 5:
+        df = pd.DataFrame(
+                           {
+                             'A' : [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, \
+                                    -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+                             'B' : [-1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, \
+                                    -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1],
+                             'C' : [-1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, \
+                                    -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1],
+                             'D' : [-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                                    -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1],
+                             'E' : [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, \
+                                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                           }
+                         )     
+        df['int'] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\
+                     1, 1, 1, 1, 1]
+        df['AB'] = df.A * df.B
+        df['AC'] = df.A * df.C
+        df['AD'] = df.A * df.D
+        df['AE'] = df.A * df.E
+        df['BC'] = df.B * df.C
+        df['BD'] = df.B * df.D
+        df['BE'] = df.B * df.E
+        df['CD'] = df.C * df.D
+        df['CE'] = df.C * df.E
+        df['DE'] = df.D * df.E
+        input_fcts.insert(0, 'int')
+        X = np.array(df[input_fcts])
+       
+        p_df = pd.DataFrame(
+                             {
+                               'A' : [sl_A],
+                               'B' : [sl_B],
+                               'C' : [sl_C],
+                               'D' : [sl_D],
+                               'E' : [sl_E],
+                             }
+                           )
+        p_df['int'] = [1]
+        p_df['AB'] = p_df.A * p_df.B
+        p_df['AC'] = p_df.A * p_df.C
+        p_df['AD'] = p_df.A * p_df.D
+        p_df['AE'] = p_df.A * p_df.E
+        p_df['BC'] = p_df.B * p_df.C
+        p_df['BD'] = p_df.B * p_df.D
+        p_df['BE'] = p_df.B * p_df.E
+        p_df['CD'] = p_df.C * p_df.D
+        p_df['CE'] = p_df.C * p_df.E
+        p_df['DE'] = p_df.D * p_df.E
+        p_X = np.array(p_df[input_fcts])  
+        
+    B = np.linalg.inv((X.T @ X)) @ (X.T @ Y) 
+    
+    p_Y = p_X @ B
+    
+    [p_response] = p_Y.tolist() 
+    
+    str_p_response = 'Predicted response = %s' %round(p_response, 4)
+    
+    return str_p_response
     
     
 if __name__ == '__main__':
