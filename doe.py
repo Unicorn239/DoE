@@ -531,7 +531,7 @@ def update_prediction(input_num, input_fcts, input_Y, sl_A, sl_B, sl_C, sl_D, sl
         p_df['AC'] = p_df.A * p_df.C
         p_df['AD'] = p_df.A * p_df.D
         p_df['BC'] = p_df.B * p_df.C
-        P_df['BD'] = p_df.B * p_df.D
+        p_df['BD'] = p_df.B * p_df.D
         p_df['CD'] = p_df.C * p_df.D
         p_X = np.array(p_df[input_fcts])        
         
