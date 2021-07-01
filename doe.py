@@ -159,7 +159,7 @@ app.layout = html.Div(
                                          ),                                
                               ],
                               lg = 6, 
-                              md = 3
+                              md = 6
                                  ),
                         
                           dbc.Col(
@@ -259,7 +259,7 @@ app.layout = html.Div(
                                          )
                               ],
                               lg = 6, 
-                              md = 3
+                              md = 6
                                  )
                         ]  
                            )
