@@ -281,7 +281,7 @@ def update_option(input_num, n_clicks):
         raise PreventUpdate
         
     if input_num == 3:
-        options = [{'label' : '%s' %fct, 'value' : fct} for fct in ['A', 'B', 'C', 'AB', 'AC', 'BC']]
+        options = [{'label' : '%s' %fct, 'value' : fct} for fct in ['A', 'B', 'C', 'AB', 'AC', 'BC', 'A^2', 'B^2', 'C^2']]
         df = pd.DataFrame(
                            {
                              'A' : [-1, 1, -1, 1, -1, 1, -1, 1, 0, 0, 0],
@@ -293,7 +293,7 @@ def update_option(input_num, n_clicks):
 
     elif input_num == 4:
         options = [{'label' : '%s' %fct, 'value' : fct} for fct in ['A', 'B', 'C', 'D', 'AB', 'AC', 'AD',\
-                                                                    'BC', 'BD', 'CD']]
+                                                                    'BC', 'BD', 'CD', 'A^2', 'B^2', 'C^2', 'D^2']]
         df = pd.DataFrame(
                            {
                              'A' : [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, 0, 0, 0],
@@ -306,7 +306,7 @@ def update_option(input_num, n_clicks):
 
     elif input_num == 5:
         options = [{'label' : '%s' %fct, 'value' : fct} for fct in ['A', 'B', 'C', 'D', 'E', 'AB', 'AC', 'AD',\
-                                                                    'AE','BC', 'BD', 'BE', 'CD', 'CE', 'DE']]
+                                                                    'AE','BC', 'BD', 'BE', 'CD', 'CE', 'DE', 'A^2', 'B^2', 'C^2', 'D^2', 'E^2']]
         df = pd.DataFrame(
                            {
                              'A' : [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, \
@@ -362,6 +362,9 @@ def update_results(input_num, input_fcts, input_Y, n_clicks):
         df['AB'] = df.A * df.B
         df['AC'] = df.A * df.C
         df['BC'] = df.B * df.C
+        df['A^2'] = df.A * df.A
+        df['B^2'] = df.B * df.B
+        df['C^2'] = df.C * df.C
         input_fcts.insert(0, 'int')
         X = np.array(df[input_fcts])
 
@@ -381,6 +384,10 @@ def update_results(input_num, input_fcts, input_Y, n_clicks):
         df['BC'] = df.B * df.C
         df['BD'] = df.B * df.D
         df['CD'] = df.C * df.D
+        df['A^2'] = df.A * df.A
+        df['B^2'] = df.B * df.B
+        df['C^2'] = df.C * df.C
+        df['D^2'] = df.D * df.D
         input_fcts.insert(0, 'int')
         X = np.array(df[input_fcts])
         
@@ -411,6 +418,11 @@ def update_results(input_num, input_fcts, input_Y, n_clicks):
         df['CD'] = df.C * df.D
         df['CE'] = df.C * df.E
         df['DE'] = df.D * df.E
+        df['A^2'] = df.A * df.A
+        df['B^2'] = df.B * df.B
+        df['C^2'] = df.C * df.C
+        df['D^2'] = df.D * df.D
+        df['E^2'] = df.E * df.E
         input_fcts.insert(0, 'int')
         X = np.array(df[input_fcts])
     
@@ -483,6 +495,9 @@ def update_prediction(input_num, input_fcts, input_Y, sl_A, sl_B, sl_C, sl_D, sl
         df['AB'] = df.A * df.B
         df['AC'] = df.A * df.C
         df['BC'] = df.B * df.C
+        df['A^2'] = df.A * df.A
+        df['B^2'] = df.B * df.B
+        df['C^2'] = df.C * df.C
         input_fcts.insert(0, 'int')
         X = np.array(df[input_fcts])
         
@@ -497,6 +512,9 @@ def update_prediction(input_num, input_fcts, input_Y, sl_A, sl_B, sl_C, sl_D, sl
         p_df['AB'] = p_df.A * p_df.B
         p_df['AC'] = p_df.A * p_df.C
         p_df['BC'] = p_df.B * p_df.C
+        p_df['A^2'] = df.A * df.A
+        p_df['B^2'] = df.B * df.B
+        p_df['C^2'] = df.C * df.C
         p_X = np.array(p_df[input_fcts])
  
     elif input_num == 4:
@@ -515,6 +533,10 @@ def update_prediction(input_num, input_fcts, input_Y, sl_A, sl_B, sl_C, sl_D, sl
         df['BC'] = df.B * df.C
         df['BD'] = df.B * df.D
         df['CD'] = df.C * df.D
+        df['A^2'] = df.A * df.A
+        df['B^2'] = df.B * df.B
+        df['C^2'] = df.C * df.C
+        df['D^2'] = df.D * df.D
         input_fcts.insert(0, 'int')
         X = np.array(df[input_fcts])
 
@@ -533,6 +555,10 @@ def update_prediction(input_num, input_fcts, input_Y, sl_A, sl_B, sl_C, sl_D, sl
         p_df['BC'] = p_df.B * p_df.C
         p_df['BD'] = p_df.B * p_df.D
         p_df['CD'] = p_df.C * p_df.D
+        p_df['A^2'] = df.A * df.A
+        p_df['B^2'] = df.B * df.B
+        p_df['C^2'] = df.C * df.C
+        p_df['D^2'] = df.D * df.D
         p_X = np.array(p_df[input_fcts])        
         
     elif input_num == 5:
@@ -562,6 +588,11 @@ def update_prediction(input_num, input_fcts, input_Y, sl_A, sl_B, sl_C, sl_D, sl
         df['CD'] = df.C * df.D
         df['CE'] = df.C * df.E
         df['DE'] = df.D * df.E
+        df['A^2'] = df.A * df.A
+        df['B^2'] = df.B * df.B
+        df['C^2'] = df.C * df.C
+        df['D^2'] = df.D * df.D
+        df['E^2'] = df.E * df.E
         input_fcts.insert(0, 'int')
         X = np.array(df[input_fcts])
        
@@ -585,6 +616,11 @@ def update_prediction(input_num, input_fcts, input_Y, sl_A, sl_B, sl_C, sl_D, sl
         p_df['CD'] = p_df.C * p_df.D
         p_df['CE'] = p_df.C * p_df.E
         p_df['DE'] = p_df.D * p_df.E
+        p_df['A^2'] = df.A * df.A
+        p_df['B^2'] = df.B * df.B
+        p_df['C^2'] = df.C * df.C
+        p_df['D^2'] = df.D * df.D
+        p_df['E^2'] = df.E * df.E
         p_X = np.array(p_df[input_fcts])  
         
     B = np.linalg.inv((X.T @ X)) @ (X.T @ Y) 
